@@ -1,0 +1,39 @@
+<?php
+/**
+ * @file
+ * Contains install and update functions for Bazaarvoice Products.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function facebook_instant_articles_schema() {
+  $schema['facebook_instant_articles_entity_types'] = array(
+    'description' => 'Mappings between Facebook Instant Articles and entities',
+    'fields' => array(
+      'entity_type' => array(
+        'description' => 'The entity type name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'entity_bundle' => array(
+        'description' => 'The entity bundle name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'unique keys' => array(
+      'type_bundle' => array(
+        'entity_type',
+        'entity_bundle',
+      ),
+    ),
+  );
+
+  return $schema;
+}
+
