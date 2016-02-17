@@ -204,3 +204,68 @@ function facebook_instant_articles_delete_entity_type($type, $bundle) {
   module_invoke_all('facebook_instant_articles_delete_type', $type, $bundle);
 }
 
+/**
+ * Return an array of nodes that are treated as articles.
+ *
+ * @return array
+ *   Array of nodes.
+ */
+function facebook_instant_articles_get_article_nodes() {
+  $nodes = array();
+  $entity_types = facebook_instant_articles_get_article_entity_types();
+  foreach($entity_types['node'] as $content_type => $entity_information) {
+    $nodes += node_load_multiple(array(), array('type' => $content_type, 'status' => 1));
+  }
+  return $nodes;
+}
+
+/**
+* Implements hook_entity_info_alter().
+*/
+function facebook_instant_articles_entity_info_alter(&$entity_info) {
+  $entity_info['node']['view modes']['facebook_instant_article'] = array(
+    'label' => t('Facebook Instant Articles'),
+    'custom settings' => TRUE,
+  );
+}
+
+/**
+ * Implements hook_node_view().
+ */
+function facebook_instant_articles_node_view($node, $view_mode) {
+  if ($view_mode == 'facebook_instant_article') {
+    //exit(print_r($node));
+    //$node->content['field_image']['#theme']
+  }
+
+  if ($view_mode != 'rss') {
+    //book_node_view_link($node, $view_mode);
+  }
+}
+
+/**
+* Implements hook_preprocess_node().
+*/
+function facebook_instant_articles_preprocess_node(&$vars) {
+  if($vars['view_mode'] == 'facebook_instant_article') {
+    //exit(print_r($vars));
+    $vars['theme_hook_suggestions'][] = 'node__facebook_instant_article';
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function facebook_instant_articles_theme() {
+  return array(
+    'node__facebook_instant_article' => array(
+    'template' => 'node--facebook-instant-article',
+    'path' => drupal_get_path('module', 'facebook_instant_articles') . '/theme',
+    'render element' => 'elements',
+  ),
+ );
+}
+
+function facebook_instant_articles_theme_registry_alter(&$theme_registry) {
+  //exit(print_r($theme_registry));
+}
