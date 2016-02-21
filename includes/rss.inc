@@ -16,10 +16,9 @@ function facebook_instant_articles_rss_page() {
   $link = $channel->addChild('link', $base_url);
   $language = $channel->addChild('language','en-gb');
 
-  //Create RFC822 Date format to comply with RFC822
-  $date_f = date("D, d M Y H:i:s T", time());
-  $build_date = gmdate(DATE_RFC2822, strtotime($date_f));
-  $lastBuildDate = $channel->addChild('lastBuildDate',$date_f);
+  // Create ISO 8601 formatted date.
+  $date_time = new DateTime('NOW');
+  $lastBuildDate = $channel->addChild('lastBuildDate', $date_time->format(DateTime::ATOM));
 
   // Create RSS items.
   $nodes = facebook_instant_articles_get_article_nodes();
@@ -31,6 +30,10 @@ function facebook_instant_articles_rss_page() {
     //exit($new_node);
     //exit(print_r(node_view($node, 'rss')));
     $item->addChildCData('content', drupal_render(node_view($node, 'facebook_instant_article')));
+    // Add published date.
+    $date_time = new DateTime();
+    $date_time->setTimestamp($node->created);
+    $item->addChild('pubDate', $date_time->format(DateTime::ATOM));
   }
 
   echo $rss->asXML();

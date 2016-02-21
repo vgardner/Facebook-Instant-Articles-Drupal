@@ -90,17 +90,17 @@
   <body>
     <article>
       <header>
-      </header>
+        <?php print render($facebook_instant_article_header); ?>
         <h2><?php print $title; ?></h2>
-
+      </header>
       <div class="content">
         <?php
-          // We hide the comments and links now so that we can render them later.
-          hide($content['comments']);
-          hide($content['links']);
-          print render($content);
+          print render($facebook_instant_article_body);
         ?>
       </div>
+      <footer>
+        <?php print render($facebook_instant_article_footer); ?>
+      </footer>
     </article>
   </body>
 </html>
