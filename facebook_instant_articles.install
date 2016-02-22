@@ -73,6 +73,60 @@ function facebook_instant_articles_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'settings' => array(
+        'description' => 'The settings for this layout.',
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'fbia_entity'       => array('entity_type'),
+      'fbia_bundle'       => array('bundle'),
+    ),
+  );
+
+  $schema['facebook_instant_articles_field_settings'] = array(
+    'description' => 'The table that holds Facebook Instant Articles field settings per display.',
+
+    // CTools export definitions.
+    'export' => array(
+      'key' => 'id',
+      'identifier' => 'facebook_instant_articles_fieldsetting',
+      'default hook' => 'facebook_instant_articles_field_settings_info',
+      'can disable' => FALSE,
+      'api' => array(
+        'owner' => 'ds',
+        'api' => 'ds',
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique id this setting.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'entity_type' => array(
+        'description' => 'The name of the entity.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bundle' => array(
+        'description' => 'The name of the entity.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+      ),
       'view_mode' => array(
         'description' => 'The name of the view_mode.',
         'type' => 'varchar',
@@ -80,15 +134,8 @@ function facebook_instant_articles_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
-      'layout' => array(
-        'description' => 'The name of the layout.',
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => TRUE,
-        'default' => '',
-      ),
       'settings' => array(
-        'description' => 'The settings for this layout.',
+        'description' => 'The Facebook Instant Articles field settings for this layout.',
         'type' => 'blob',
         'not null' => FALSE,
         'size' => 'big',

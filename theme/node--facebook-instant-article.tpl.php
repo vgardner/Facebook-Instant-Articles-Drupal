@@ -93,14 +93,20 @@
         <?php print render($facebook_instant_article_header); ?>
         <h2><?php print $title; ?></h2>
       </header>
-      <div class="content">
-        <?php
-          print render($facebook_instant_article_body);
-        ?>
-      </div>
-      <footer>
-        <?php print render($facebook_instant_article_footer); ?>
-      </footer>
+
+      <?php if (!empty($facebook_instant_article_body)): ?>
+        <div class="content">
+          <?php
+            print render($facebook_instant_article_body);
+          ?>
+        </div>
+      <?php endif; ?>
+
+      <?php if (!empty($facebook_instant_article_footer)): ?>
+        <footer>
+          <?php print render($facebook_instant_article_footer); ?>
+        </footer>
+        <?php endif; ?>
     </article>
   </body>
 </html>

@@ -252,20 +252,25 @@ function facebook_instant_articles_node_view($node, $view_mode) {
 * Implements hook_preprocess_node().
 */
 function facebook_instant_articles_preprocess_node(&$vars) {
-  //exit(print_r($vars));
-
   if($vars['view_mode'] == 'facebook_instant_article') {
 
     $layout_settings = facebook_instant_articles_get_node_layout_settings($vars['type']);
-
     $regions = $layout_settings->settings['regions'];
 
     foreach ($regions as $region => $fields) {
       foreach ($fields as $field) {
-        $vars['facebook_instant_article_' . $region][$field] = $vars['content'][$field];
+        $field_array = $vars['content'][$field];
+
+        // TODO: Make title field format configurable.
+        if ($field == 'title') {
+          $field_array = array(
+            '#markup' => '<h1>' . $vars['title'] . '</h1>',
+          );
+        }
+
+        $vars['facebook_instant_article_' . $region][$field] = $field_array;
       }
     }
-
     $vars['theme_hook_suggestions'][] = 'node__facebook_instant_article';
   }
 }
@@ -324,8 +329,9 @@ function facebook_instant_articles_form_alter(&$form, &$form_state, $form_id) {
 function facebook_instant_articles_get_node_layout_settings($bundle_name) {
   ctools_include('export');
   $export_id =  'node|' . $bundle_name . '|facebook_instant_article';
-  $ds_layout_settings = ctools_export_crud_load_all('facebook_instant_articles_layout_settings');
 
+  $ds_layout_settings = ctools_export_crud_load_all('facebook_instant_articles_layout_settings');
+//exit(print_r($ds_layout_settings));
   $layout = new stdClass();
   if (isset($ds_layout_settings[$export_id])) {
     $layout = $ds_layout_settings[$export_id];
