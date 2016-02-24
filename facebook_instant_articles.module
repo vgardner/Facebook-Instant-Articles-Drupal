@@ -233,22 +233,6 @@ function facebook_instant_articles_entity_info_alter(&$entity_info) {
 }
 
 /**
- * Implements hook_node_view().
- */
-function facebook_instant_articles_node_view($node, $view_mode) {
-  //exit(print_r($node));
-
-  if ($view_mode == 'facebook_instant_article') {
-    //exit(print_r($node));
-    //$node->content['field_image']['#theme']
-  }
-
-  if ($view_mode != 'rss') {
-    //book_node_view_link($node, $view_mode);
-  }
-}
-
-/**
 * Implements hook_preprocess_node().
 */
 function facebook_instant_articles_preprocess_node(&$vars) {
@@ -281,16 +265,8 @@ function facebook_instant_articles_preprocess_node(&$vars) {
 function facebook_instant_articles_preprocess_field(&$vars) {
   $element = $vars['element'];
   if ($element['#view_mode'] == 'facebook_instant_article') {
-    switch ($element['#field_type']) {
-      case 'image':
-        $vars['theme_hook_suggestions'][] = 'field__figure_facebook_instant_article';
-        break;
-      default:
-        $vars['theme_hook_suggestions'][] = 'field__facebook_instant_article';
-        break;
-    }
+    $vars['theme_hook_suggestions'][] = 'field__facebook_instant_article';
   }
-  //exit(print_r($vars));
 }
 
 /**
@@ -319,10 +295,15 @@ function facebook_instant_articles_theme() {
 
 function facebook_instant_articles_form_alter(&$form, &$form_state, $form_id) {
 
-  if ($form_id == 'field_ui_display_overview_form' && $form['#view_mode'] == 'facebook_instant_article') {
-    form_load_include($form_state, 'inc', 'facebook_instant_articles', 'includes/view_mode_layout');
+  if ($form_id == 'field_ui_display_overview_form') {
+    if($form['#view_mode'] == 'facebook_instant_article') {
+      form_load_include($form_state, 'inc', 'facebook_instant_articles', 'includes/view_mode_layout');
 
-    facebook_instant_articles_layout_form($form, $form_state);
+      facebook_instant_articles_layout_form($form, $form_state);
+    }
+    else {
+      facebook_instant_articles_cleanup_view_mode_formatters($form);
+    }
   }
 }
 
@@ -331,10 +312,329 @@ function facebook_instant_articles_get_node_layout_settings($bundle_name) {
   $export_id =  'node|' . $bundle_name . '|facebook_instant_article';
 
   $ds_layout_settings = ctools_export_crud_load_all('facebook_instant_articles_layout_settings');
-//exit(print_r($ds_layout_settings));
+
   $layout = new stdClass();
   if (isset($ds_layout_settings[$export_id])) {
     $layout = $ds_layout_settings[$export_id];
   }
   return $layout;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function facebook_instant_articles_field_formatter_info() {
+  $formats = array();
+  $formats['fbia_subtitle_formatter'] = array(
+    'label' => t('FBIA Subtitle'),
+    'field types' => array('text', 'text_with_summary')
+  );
+  $formats['fbia_kicker_formatter'] = array(
+    'label' => t('FBIA Kicker'),
+    'field types' => array('text', 'text_with_summary')
+  );
+  $formats['fbia_blockquote_formatter'] = array(
+    'label' => t('FBIA Blockquote'),
+    'field types' => array('text', 'text_long', 'text_with_summary'),
+  );
+  $formats['fbia_pullquote_formatter'] = array(
+    'label' => t('FBIA Pullquote'),
+    'field types' => array('text', 'text_long', 'text_with_summary'),
+  );
+  $formats['fbia_credits_formatter'] = array(
+    'label' => t('FBIA Credits'),
+    'field types' => array('text', 'text_long', 'text_with_summary'),
+  );
+  $formats['fbia_copyright_formatter'] = array(
+    'label' => t('FBIA Copyright'),
+    'field types' => array('text', 'text_long', 'text_with_summary'),
+  );
+  $formats['fbia_author_formatter'] = array(
+    'label' => t('FBIA Author'),
+    'field types' => array('text', 'text_long', 'text_with_summary', 'list_text')
+  );
+  $formats['fbia_ad_formatter'] = array(
+    'label' => t('FBIA Ad'),
+    'field types' => array('text', 'text_long', 'text_with_summary'),
+    'settings'  => array(
+        'height' => '50',
+        'width' => '320',
+        'source' => 'url',
+      ),
+  );
+  $formats['fbia_analytics_formatter'] = array(
+    'label' => t('FBIA Analytics'),
+    'field types' => array('text', 'text_long', 'text_with_summary'),
+    'settings'  => array(
+        'source' => 'url',
+      ),
+  );
+  $formats['fbia_image_formatter'] = array(
+    'label' => t('FBIA Image'),
+    'field types' => array('image'),
+    'settings'  => array(
+      'style' => 'medium',
+      'caption' => '',
+      'likes' => '',
+      'comments' => '',
+      'fullscreen' => '',
+    ),
+  );
+  $formats['fbia_interactive_formatter'] = array(
+    'label' => t('FBIA Interactive'),
+    'field types' => array('text', 'text_with_summary'),
+    'settings'  => array(
+        'height' => '50',
+        'width' => 'no-margin',
+      ),
+  );
+  $formats['fbia_list_formatter'] = array(
+    'label' => t('FBIA List'),
+    'field types' => array('list_text', 'list_integer', 'list_float', 'list_boolean'),
+    'settings'  => array(
+        'list_type' => 'ol',
+      ),
+  );
+  return $formats;
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function facebook_instant_articles_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $element = array();
+
+  switch ($display['type']) {
+
+    case 'fbia_ad_formatter':
+      $element['source'] = array(
+        '#type' => 'select',                           // Use a select box widget
+        '#title'          => t('Source'),                   // Widget label
+        '#description'    => t('Add your ad specifying the URL or embed the full unescaped HTML.'), // Helper text
+        '#default_value'  => $settings['source'],              // Get the value if it's already been set
+        '#options' => array(
+          'url'  => t('Ad URL'),
+          'embed' => t('Embedded HTML'),
+        ),
+      );
+      $element['height'] = array(
+        '#type'           => 'textfield',
+        '#title'          => t('Height'),                      // Widget label
+        '#description'    => t('Height of the iframe element.'),  // helper text
+        '#default_value'  => $settings['height'],               // Get the value if it's already been set
+      );
+      $element['width'] = array(
+        '#type'           => 'textfield',                        // Use a textbox
+        '#title'          => t('Width'),                      // Widget label
+        '#description'    => t('Width of the iframe element.'),  // helper text
+        '#default_value'  => $settings['width'],
+      );
+    break;
+
+    case 'fbia_interactive_formatter':
+      $element['height'] = array(
+        '#type'           => 'textfield',                        // Use a textbox
+        '#title'          => t('Height'),                      // Widget label
+        '#description'    => t('The height of your interactive graphic.'),  // helper text
+        '#default_value'  => $settings['height'],
+      );
+
+      $element['width'] = array(
+        '#type' => 'select',                           // Use a select box widget
+        '#title'          => t('Width'),                   // Widget label
+        '#description'    => t('The width of your interactive graphic.'),
+        '#default_value'  => $settings['width'],
+        '#options'        => array(
+          'no-margin'  => t('no-margin'),
+          'column-width' => t('column-width'),
+        ),
+      );
+    break;
+
+    case 'fbia_list_formatter':
+      $element['list_type'] = array(
+        '#type' => 'select',                           // Use a select box widget
+        '#title'          => t('List Type'),                   // Widget label
+        '#description'    => t('Choose list type.'),
+        '#default_value'  => $settings['list_type'],
+        '#options'        => array(
+          'ol'  => t('Ordered'),
+          'ul' => t('Unordered'),
+        ),
+      );
+    break;
+
+    case 'fbia_image_formatter':
+      $styles = image_styles();
+      $options = array();
+      foreach ($styles as $style_key => $style) {
+        $options[$style_key] = $style['label'];
+      }
+      $element['style'] = array(
+        '#type' => 'select',                           // Use a select box widget
+        '#title'          => t('Style'),                   // Widget label
+        '#description'    => t('The style of the image.'), // Helper text
+        '#default_value'  => $settings['style'],              // Get the value if it's already been set
+        '#options'        => $options,
+      );
+      $element['caption'] = array(
+        '#type' => 'checkbox',
+        '#description'    => t('The caption uses the alt text of the image field.'),
+        '#title' => t('Enable caption.'),
+        '#default_value'  => $settings['caption'],
+      );
+      $element['likes'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Enable Facebook Likes. (data-feedback)'),
+        '#default_value'  => $settings['likes'],
+      );
+      $element['comments'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Enable Facebook Comments. (data-feedback)'),
+        '#default_value'  => $settings['comments'],
+      );
+      $element['fullscreen'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Enable Fullscreen.'),
+        '#default_value'  => $settings['fullscreen'],
+      );
+    break;
+
+    case 'fbia_analytics_formatter':
+      $element['source'] = array(
+        '#type' => 'select',                           // Use a select box widget
+        '#title'          => t('Source'),                   // Widget label
+        '#description'    => t('Add your tracker specifying the URL or embed the full unescaped HTML.'), // Helper text
+        '#default_value'  => $settings['source'],              // Get the value if it's already been set
+        '#options'        => array(
+          'url'  => t('Ad URL'),
+          'embed' => t('Embedded HTML'),
+        ),
+      );
+    break;
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function facebook_instant_articles_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  switch ($display['type']) {
+    case 'fbia_ad_formatter':
+      $summary = t('Ad field - set the Source, iFrame height (@height) and width (@width).', array(
+        '@height'     => $settings['height'],
+        '@width'  => $settings['width'],
+      ));
+      return $summary;
+      break;
+
+    case 'fbia_interactive_formatter':
+      $summary = t('Interactive field - set iFrame height (@height) and width (@width).', array(
+        '@height'     => $settings['height'],
+        '@width'  => $settings['width'],
+      ));
+      return $summary;
+      break;
+
+    case 'fbia_analytics_formatter':
+      $summary = t('Analytics field - set the Source of the iframe. (@source)', array(
+        '@source'     => $settings['source'],
+      ));
+      return $summary;
+      break;
+
+    case 'fbia_image_formatter':
+      $summary = t('Image field - Style:(@style)', array(
+        '@style'     => $settings['style'],
+      ));
+      return $summary;
+      break;
+
+    case 'fbia_list_formatter':
+      $summary = t('List field - Type:(@list_type)', array(
+        '@list_type'     => $settings['list_type'],
+      ));
+      return $summary;
+      break;
+  }
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function facebook_instant_articles_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+
+  module_load_include('inc', 'facebook_instant_articles', 'includes/elements');
+  $element = array();
+  $settings = $display['settings'];
+
+  switch ($display['type']) {
+
+    case 'fbia_subtitle_formatter':
+      $element = facebook_instant_articles_field_format_standard_element($items, 'h2');
+    break;
+
+    case 'fbia_kicker_formatter':
+      $element = facebook_instant_articles_field_format_standard_element($items, 'h3', 'op-kicker');
+    break;
+
+    case 'fbia_blockquote_formatter':
+      $element = facebook_instant_articles_field_format_standard_element($items, 'blockquote');
+    break;
+
+    case 'fbia_author_formatter':
+      $element = facebook_instant_articles_field_format_standard_element($items, 'address');
+    break;
+
+    case 'fbia_credits_formatter':
+    case 'fbia_pullquote_formatter':
+      $element = facebook_instant_articles_field_format_standard_element($items, 'aside');
+    break;
+
+    case 'fbia_copyright_formatter':
+      $element = facebook_instant_articles_field_format_standard_element($items, 'small');
+    break;
+
+    case 'fbia_ad_formatter':
+      $element = facebook_instant_articles_field_format_ad_element($items, $settings);
+    break;
+
+    case 'fbia_analytics_formatter':
+      $element = facebook_instant_articles_field_format_analytics_element($items, $settings);
+    break;
+
+    case 'fbia_image_formatter':
+      $element = facebook_instant_articles_field_format_image_element($items, $settings);
+    break;
+
+    case 'fbia_interactive_formatter':
+      $element = facebook_instant_articles_field_format_interactive_element($items, $settings);
+    break;
+
+    case 'fbia_list_formatter':
+      $element = facebook_instant_articles_field_format_list_element($items, $settings);
+    break;
+  }
+
+  return $element;
+}
+
+function facebook_instant_articles_cleanup_view_mode_formatters(&$form) {
+  foreach ($form['fields'] as $field_key => $field) {
+    if (strpos($field_key, '#') === FALSE) {
+      foreach($field['format']['type']['#options'] as $format_key => $format){
+        if (strpos($format_key, 'fbia') !== FALSE) {
+          unset($form['fields'][$field_key]['format']['type']['#options'][$format_key]);
+        }
+      }
+    }
+  }
 }

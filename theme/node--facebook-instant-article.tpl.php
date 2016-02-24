@@ -91,7 +91,6 @@
     <article>
       <header>
         <?php print render($facebook_instant_article_header); ?>
-        <h2><?php print $title; ?></h2>
       </header>
 
       <?php if (!empty($facebook_instant_article_body)): ?>

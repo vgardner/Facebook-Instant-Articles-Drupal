@@ -14,10 +14,6 @@ function facebook_instant_articles_layout_form(&$form, &$form_state) {
 
   facebook_instant_articles_field_ui_fields($entity_type, $bundle_name, $view_mode, $form, $form_state);
 
-  // Also alter core fields
-  //_ds_field_ui_core_fields($entity_type, $bundle, $view_mode, $form, $form_state);
-
-
     // Attach js.
   $form['#attached']['js'][] = drupal_get_path('module', 'facebook_instant_articles') . '/js/admin.js';
 
@@ -40,7 +36,7 @@ function facebook_instant_articles_add_regions(&$form, &$form_state) {
 
   // Check layout.
   $layout = isset($form['#fbia_layout']) ? $form['#fbia_layout'] : FALSE;
-  //exit(print_r($layout));
+
   $table = &$form['fields'];
 
   $table['#header'] = array(
@@ -107,7 +103,7 @@ function facebook_instant_articles_add_regions(&$form, &$form_state) {
       'title' => t('Enter a number to limit the number of items or \'delta\' to print a specific delta (usually configured in views or found in entity->ds_delta). Leave empty to display them all. Note that depending on the formatter settings, this option might not always work.'),
     ),
   );
-  //exit(print_r($table));
+
    // Update existing rows by changing rowHandler and adding regions.
   foreach (element_children($table) as $name) {
     $row = &$table[$name];
@@ -320,9 +316,8 @@ function facebook_instant_articles_field_ui_fields($entity_type, $bundle, $view_
   // Get field settings.
   $field_settings = facebook_instant_articles_get_field_settings($entity_type, $bundle, $view_mode, FALSE);
   $form['#field_settings'] = $field_settings;
-//exit(print_r($form['#field_settings']));
+
   $table = &$form['fields'];
-  //exit(print_r($table));
   $form['#fbia_fields'] = array();
 
   $field_label_options = array(
@@ -337,8 +332,7 @@ function facebook_instant_articles_field_ui_fields($entity_type, $bundle, $view_
   if (isset($form['#fbia_layout']->settings['fields'])) {
     $field_regions = $form['#fbia_layout']->settings['fields'];
   }
-//exit(print_r($field_regions));
-  //exit(print_r($fields));
+
   foreach ($fields as $key => $field) {
 
     $form['#fbia_fields'][] = $key;

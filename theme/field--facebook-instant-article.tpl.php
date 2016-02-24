@@ -44,8 +44,4 @@
  * @ingroup themeable
  */
 ?>
-<div class="<?php print $classes; ?>">
-  <?php foreach ($items as $delta => $item): ?>
-    <div class="field-item"><?php print render($item); ?></div>
-  <?php endforeach; ?>
-</div>
+<?php print render($item); ?>
