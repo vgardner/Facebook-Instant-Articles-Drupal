@@ -34,7 +34,7 @@ function facebook_instant_articles_schema() {
     ),
   );
 
-   $schema['facebook_instant_articles_layout_settings'] = array(
+  $schema['facebook_instant_articles_layout_settings'] = array(
     'description' => 'The table that holds the Facebook Instant Articles layout configuration.',
 
     // CTools export definitions.

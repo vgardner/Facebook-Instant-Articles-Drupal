@@ -1,17 +1,28 @@
 <?php
+/**
+ * @file
+ * Functions for FBIA formatter output.
+ */
+
+/**
+ * Formatter for standard elements.
+ */
 function facebook_instant_articles_field_format_standard_element($items, $wrapper_tag = 'p', $class = '') {
   $element = array();
 
   if (!empty($class)) {
-    $class = ' class="'. $class .'"';
+    $class = ' class="' . $class . '"';
   }
 
   foreach ($items as $delta => $item) {
-    $element[0]['#markup'] = '<'. $wrapper_tag . $class .'>' . $item['safe_value'] . '</'. $wrapper_tag . '>';
+    $element[0]['#markup'] = '<' . $wrapper_tag . $class . '>' . $item['safe_value'] . '</' . $wrapper_tag . '>';
   }
   return $element;
 }
 
+/**
+ * Formatter for the Ad element.
+ */
 function facebook_instant_articles_field_format_ad_element($items, $settings) {
   $element = array();
 
@@ -24,7 +35,7 @@ function facebook_instant_articles_field_format_ad_element($items, $settings) {
     if (!empty($settings['width'])) {
       $attributes .= ' width="' . $settings['width'] . '"';
     }
-    switch($settings['source']) {
+    switch ($settings['source']) {
       case 'embed':
         $element[0]['#markup'] = '<figure class="op-ad"><iframe ' . $attributes . '>' . $item['safe_value'] . '</iframe></figure>';
       break;
@@ -36,10 +47,13 @@ function facebook_instant_articles_field_format_ad_element($items, $settings) {
   return $element;
 }
 
+/**
+ * Formatter for the Analytics element.
+ */
 function facebook_instant_articles_field_format_analytics_element($items, $settings) {
   $element = array();
   foreach ($items as $delta => $item) {
-    switch($settings['source']) {
+    switch ($settings['source']) {
       case 'embed':
         $element[0]['#markup'] = '<figure class="op-tracker"><iframe>' . $item['safe_value'] . '</iframe></figure>';
       break;
@@ -51,6 +65,9 @@ function facebook_instant_articles_field_format_analytics_element($items, $setti
   return $element;
 }
 
+/**
+ * Formatter for the Image element.
+ */
 function facebook_instant_articles_field_format_image_element($items, $settings) {
   $element = array();
 
@@ -90,6 +107,9 @@ function facebook_instant_articles_field_format_image_element($items, $settings)
   return $element;
 }
 
+/**
+ * Formatter for the Interactive element.
+ */
 function facebook_instant_articles_field_format_interactive_element($items, $settings) {
   $element = array();
 
@@ -108,6 +128,9 @@ function facebook_instant_articles_field_format_interactive_element($items, $set
   return $element;
 }
 
+/**
+ * Formatter for the List element.
+ */
 function facebook_instant_articles_field_format_list_element($items, $settings) {
   $element = array();
 
@@ -120,7 +143,7 @@ function facebook_instant_articles_field_format_list_element($items, $settings) 
   $list_markup = '<' . $list_type . '>';
 
   foreach ($items as $delta => $item) {
-     $list_markup .= '<li>' . $item['value'] . '</li>';
+    $list_markup .= '<li>' . $item['value'] . '</li>';
   }
 
   $list_markup .= '</' . $list_type . '>';

@@ -1,8 +1,14 @@
 <?php
 /**
+ * @file
+ * Facebook Instant Articles core functions.
+ */
+
+/**
  * Implements hook_help().
  */
 function facebook_instant_articles_menu() {
+  // RSS Endpoint.
   $items['fbinstant.rss'] = array(
     'page callback' => 'facebook_instant_articles_rss_page',
     'file' => 'includes/rss.inc',
@@ -19,7 +25,7 @@ function facebook_instant_articles_menu() {
     'file' => 'includes/admin.inc',
   );
 
-  // Configure Bazaarvoice settings.
+  // Configure Facebook Instant Article settings.
   $items['admin/config/services/facebook-instant-articles/settings'] = array(
     'title' => 'Settings',
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -216,15 +222,15 @@ function facebook_instant_articles_delete_entity_type($type, $bundle) {
 function facebook_instant_articles_get_article_nodes() {
   $nodes = array();
   $entity_types = facebook_instant_articles_get_article_entity_types();
-  foreach($entity_types['node'] as $content_type => $entity_information) {
+  foreach ($entity_types['node'] as $content_type => $entity_information) {
     $nodes += node_load_multiple(array(), array('type' => $content_type, 'status' => 1));
   }
   return $nodes;
 }
 
 /**
-* Implements hook_entity_info_alter().
-*/
+ * Implements hook_entity_info_alter().
+ */
 function facebook_instant_articles_entity_info_alter(&$entity_info) {
   $entity_info['node']['view modes']['facebook_instant_article'] = array(
     'label' => t('Facebook Instant Articles'),
@@ -233,10 +239,10 @@ function facebook_instant_articles_entity_info_alter(&$entity_info) {
 }
 
 /**
-* Implements hook_preprocess_node().
-*/
+ * Implements hook_preprocess_node().
+ */
 function facebook_instant_articles_preprocess_node(&$vars) {
-  if($vars['view_mode'] == 'facebook_instant_article') {
+  if ($vars['view_mode'] == 'facebook_instant_article') {
 
     $layout_settings = facebook_instant_articles_get_node_layout_settings($vars['type']);
     $regions = $layout_settings->settings['regions'];
@@ -260,8 +266,8 @@ function facebook_instant_articles_preprocess_node(&$vars) {
 }
 
 /**
-* Implements hook_preprocess_node().
-*/
+ * Implements hook_preprocess_node().
+ */
 function facebook_instant_articles_preprocess_field(&$vars) {
   $element = $vars['element'];
   if ($element['#view_mode'] == 'facebook_instant_article') {
@@ -293,10 +299,13 @@ function facebook_instant_articles_theme() {
   );
 }
 
+/**
+ * Implements hook_form_alter().
+ */
 function facebook_instant_articles_form_alter(&$form, &$form_state, $form_id) {
 
   if ($form_id == 'field_ui_display_overview_form') {
-    if($form['#view_mode'] == 'facebook_instant_article') {
+    if ($form['#view_mode'] == 'facebook_instant_article') {
       form_load_include($form_state, 'inc', 'facebook_instant_articles', 'includes/view_mode_layout');
 
       facebook_instant_articles_layout_form($form, $form_state);
@@ -307,6 +316,9 @@ function facebook_instant_articles_form_alter(&$form, &$form_state, $form_id) {
   }
 }
 
+/**
+ * Get the layout settings for a specific bundle.
+ */
 function facebook_instant_articles_get_node_layout_settings($bundle_name) {
   ctools_include('export');
   $export_id =  'node|' . $bundle_name . '|facebook_instant_article';
@@ -627,10 +639,13 @@ function facebook_instant_articles_field_formatter_view($entity_type, $entity, $
   return $element;
 }
 
+/**
+ * Remove formatters from view modes which are not Facebook Instant Articles.
+ */
 function facebook_instant_articles_cleanup_view_mode_formatters(&$form) {
   foreach ($form['fields'] as $field_key => $field) {
     if (strpos($field_key, '#') === FALSE) {
-      foreach($field['format']['type']['#options'] as $format_key => $format){
+      foreach ($field['format']['type']['#options'] as $format_key => $format) {
         if (strpos($format_key, 'fbia') !== FALSE) {
           unset($form['fields'][$field_key]['format']['type']['#options'][$format_key]);
         }

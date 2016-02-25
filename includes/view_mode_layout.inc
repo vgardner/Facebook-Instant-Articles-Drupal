@@ -1,4 +1,12 @@
 <?php
+/**
+ * @file
+ * Functions to handle layout of the FBIA View Mode.
+ */
+
+/**
+ * Includes FBIA View Mode elements.
+ */
 function facebook_instant_articles_layout_form(&$form, &$form_state) {
 
   // Get the entity_type, bundle and view mode.
@@ -27,6 +35,9 @@ function facebook_instant_articles_layout_form(&$form, &$form_state) {
   $form['#submit'] = array_merge($form['#submit'], $submit);
 }
 
+/**
+ * Includes regions FBIA View Mode.
+ */
 function facebook_instant_articles_add_regions(&$form, &$form_state) {
 
   // Get the entity_type, bundle and view mode.
@@ -158,6 +169,9 @@ function facebook_instant_articles_field_ui_row_region($row) {
   return isset($row['region']['#value']) ? $row['region']['#value'] : 'hidden';
 }
 
+/**
+ * Save layout configuration of FBIA View Mode.
+ */
 function facebook_instant_articles_field_ui_layouts_save($form, &$form_state) {
   $weight = 0;
 

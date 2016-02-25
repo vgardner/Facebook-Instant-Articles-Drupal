@@ -1,31 +1,36 @@
 <?php
 /**
  * @file
- * Provides the Bazaarvoice administrative interface.
+ * Provides the Facebook Instant Articles administrative interface.
  */
 
 /**
  * Admin settings form.
  */
 function facebook_instant_articles_admin_settings_form() {
-  $form['account'] = array(
+  $form['general'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Account Settings'),
-    '#description' => t('Bazaarvoice account settings'),
+    '#title' => t('General Settings'),
     '#collapsible' => TRUE,
   );
-
-  $form['account']['bazaarvoice_mode'] = array(
-    '#type' => 'select',
-    '#title' => t('Account Mode'),
-    '#description' => t('Mode to use for connecting to Bazaarvoice. Use staging for pre-production development and testing.'),
-    '#options' => array(
-      'stg' => t('Staging'),
-      'prod' => t('Production'),
-    ),
-    '#default_value' => variable_get('bazaarvoice_mode', 'stg'),
+  $form['general']['fbia_channel_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Channel Title'),
+    '#default_value' => variable_get('fbia_channel_title', variable_get('site_name', t('Default site name'))),
+    '#size' => 60,
   );
-
+  $form['general']['fbia_channel_description'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Channel Description'),
+    '#default_value' => variable_get('fbia_channel_description', variable_get('site_slogan', t('Default site slogan.'))),
+    '#size' => 140,
+  );
+  $form['general']['fbia_channel_language'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Channel Language'),
+    '#default_value' => variable_get('fbia_channel_language', 'en-gb'),
+    '#size' => 10,
+  );
   $form = system_settings_form($form);
 
   return $form;
