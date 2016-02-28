@@ -1,10 +1,12 @@
 <?php
+/**
+ * @file
+ * Field template for Facebook Instant Article fields.
+ */
 
 /**
- * @file field.tpl.php
- * Default template implementation to display the value of a field.
+ * Variables that can be used in this template.
  *
- * This file is not used and is here as a starting point for customization only.
  * @see theme_field()
  *
  * Available variables:

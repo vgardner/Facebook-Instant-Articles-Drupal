@@ -18,15 +18,15 @@ function facebook_instant_articles_rss_page() {
   $channel = $rss->addChild('channel');
 
   // Add Channel information;
-  $title = $channel->addChild('title', variable_get('fbia_channel_title', variable_get('site_name', 'Default site name')));
-  $description = $channel->addChild('description', variable_get('fbia_channel_description', variable_get('site_slogan', t('Default site slogan.'))));
+  $channel->addChild('title', variable_get('facebook_instant_articles_channel_title', variable_get('site_name', 'Default site name')));
+  $channel->addChild('description', variable_get('facebook_instant_articles_channel_description', variable_get('site_slogan', t('Default site slogan.'))));
   global $base_url;
-  $link = $channel->addChild('link', $base_url);
-  $language = $channel->addChild('language', variable_get('fbia_channel_language', 'en-gb'));
+  $channel->addChild('link', $base_url);
+  $channel->addChild('language', variable_get('facebook_instant_articles_channel_language', 'en-gb'));
 
   // Create ISO 8601 formatted date.
   $date_time = new DateTime('NOW');
-  $last_build_date = $channel->addChild('lastBuildDate', $date_time->format(DateTime::ATOM));
+  $channel->addChild('lastBuildDate', $date_time->format(DateTime::ATOM));
 
   // Create RSS items.
   $nodes = facebook_instant_articles_get_article_nodes();
@@ -35,7 +35,7 @@ function facebook_instant_articles_rss_page() {
     $item->addChild('title', $node->title);
     $item->addChild('link', url(drupal_get_path_alias("node/" . $node->nid), array('absolute' => TRUE)));
 
-    $item->addChildCData('content', drupal_render(node_view($node, 'facebook_instant_article')));
+    $item->addChildCdata('content', drupal_render(node_view($node, 'facebook_instant_article')));
 
     // Add published date.
     $date_time = new DateTime();

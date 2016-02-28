@@ -15,14 +15,12 @@ function facebook_instant_articles_layout_form(&$form, &$form_state) {
   $view_mode = $form['#view_mode'];
   $form['#export_id'] = $entity_type . '|' . $bundle_name . '|' . $view_mode;
 
-  $layout_options = array();
-
   $layout = facebook_instant_articles_get_node_layout_settings($bundle_name);
   $form['#fbia_layout'] = $layout;
 
   facebook_instant_articles_field_ui_fields($entity_type, $bundle_name, $view_mode, $form, $form_state);
 
-    // Attach js.
+  // Attach js.
   $form['#attached']['js'][] = drupal_get_path('module', 'facebook_instant_articles') . '/js/admin.js';
 
   // Add process function to add the regions.
@@ -62,7 +60,7 @@ function facebook_instant_articles_add_regions(&$form, &$form_state) {
   $regions = array(
     'header' => t('Header'),
     'body' => t('Body'),
-    'footer' => t('Footer')
+    'footer' => t('Footer'),
   );
 
   $table['#regions'] = array();
@@ -78,7 +76,7 @@ function facebook_instant_articles_add_regions(&$form, &$form_state) {
   $context = array(
     'entity_type' => $entity_type,
     'bundle' => $bundle,
-    'view_mode' => $view_mode
+    'view_mode' => $view_mode,
   );
   $region_info = array(
     'region_options' => &$region_options,
@@ -89,7 +87,7 @@ function facebook_instant_articles_add_regions(&$form, &$form_state) {
   $region_options['hidden'] = $view_mode != 'form' ? t('Disabled') : t('Hidden');
   $table['#regions']['hidden'] = array(
     'title' => $view_mode != 'form' ? t('Disabled') : t('Hidden'),
-    'message' => t('No fields are hidden.')
+    'message' => t('No fields are hidden.'),
   );
 
   $region = array(
@@ -98,7 +96,7 @@ function facebook_instant_articles_add_regions(&$form, &$form_state) {
     '#default_value' => 'hidden',
     '#attributes' => array(
       'class' => array('ds-field-region'),
-    )
+    ),
   );
 
   $limit_items = array(
@@ -110,12 +108,12 @@ function facebook_instant_articles_add_regions(&$form, &$form_state) {
     '#prefix' => '<div class="limit-float">',
     '#suffix' => '</div><div class="clearfix"></div>',
     '#attributes' => array(
-      'alt' => t('Enter a number to limit the number of items or \'delta\' to print a specific delta (usually configured in views or found in entity->ds_delta). Leave empty to display them all. Note that depending on the formatter settings, this option might not always work.'),
-      'title' => t('Enter a number to limit the number of items or \'delta\' to print a specific delta (usually configured in views or found in entity->ds_delta). Leave empty to display them all. Note that depending on the formatter settings, this option might not always work.'),
+      'alt' => t("Enter a number to limit the number of items or 'delta' to print a specific delta (usually configured in views or found in entity->delta). Leave empty to display them all. Note that depending on the formatter settings, this option might not always work."),
+      'title' => t("Enter a number to limit the number of items or 'delta' to print a specific delta (usually configured in views or found in entity->delta). Leave empty to display them all. Note that depending on the formatter settings, this option might not always work."),
     ),
   );
 
-   // Update existing rows by changing rowHandler and adding regions.
+  // Update existing rows by changing rowHandler and adding regions.
   foreach (element_children($table) as $name) {
     $row = &$table[$name];
     $row['#js_settings'] = array('rowHandler' => 'facebookInstantArticles');
@@ -136,34 +134,31 @@ function facebook_instant_articles_add_regions(&$form, &$form_state) {
     }
 
     // Limit items.
-      $field_info = field_info_field($name);
-      if (isset($field_info['cardinality']) && $field_info['cardinality'] != 1 && $view_mode != 'form') {
-        $row['format']['type']['#prefix'] = '<div class="limit-float">';
-        $row['format']['type']['#suffix'] = '</div>';
-        $row['format']['limit'] = $limit_items;
-        $row['format']['limit']['#default_value'] = (isset($layout->settings['limit']) && isset($layout->settings['limit'][$name])) ? $layout->settings['limit'][$name] : '#';
-      }
-
-      // Add region.
-      $split = ($view_mode != 'form') ? 7 : 6;
-      if ($row['#row_type'] == 'group' && $view_mode == 'form') {
-        $split = ($view_mode != 'form') ? 8 : 7;
-      }
-
-      $second = array_splice($row, $split);
-      $row['region'] = $region;
-      $row['region']['#default_value'] = (isset($layout->settings['fields'][$name]) && isset($region_options[$layout->settings['fields'][$name]])) ? $layout->settings['fields'][$name] : 'hidden';
-
-      $row = array_merge($row, $second);
+    $field_info = field_info_field($name);
+    if (isset($field_info['cardinality']) && $field_info['cardinality'] != 1 && $view_mode != 'form') {
+      $row['format']['type']['#prefix'] = '<div class="limit-float">';
+      $row['format']['type']['#suffix'] = '</div>';
+      $row['format']['limit'] = $limit_items;
+      $row['format']['limit']['#default_value'] = (isset($layout->settings['limit']) && isset($layout->settings['limit'][$name])) ? $layout->settings['limit'][$name] : '#';
     }
+
+    // Add region.
+    $split = ($view_mode != 'form') ? 7 : 6;
+    if ($row['#row_type'] == 'group' && $view_mode == 'form') {
+      $split = ($view_mode != 'form') ? 8 : 7;
+    }
+
+    $second = array_splice($row, $split);
+    $row['region'] = $region;
+    $row['region']['#default_value'] = (isset($layout->settings['fields'][$name]) && isset($region_options[$layout->settings['fields'][$name]])) ? $layout->settings['fields'][$name] : 'hidden';
+
+    $row = array_merge($row, $second);
+  }
   return $form;
 }
 
 /**
  * Returns the region to which a row in the Field UI screen belongs.
- *
- * @param $row
- *   The current row that is being rendered in the Field UI screen.
  */
 function facebook_instant_articles_field_ui_row_region($row) {
   return isset($row['region']['#value']) ? $row['region']['#value'] : 'hidden';
@@ -184,7 +179,7 @@ function facebook_instant_articles_field_ui_layouts_save($form, &$form_state) {
   $layout = 'facebook_instant_article';
 
   // Save layout and add regions if necessary.
-  $record = new stdClass;
+  $record = new stdClass();
   $record->id = $form['#export_id'];
   $record->entity_type = $entity_type;
   $record->bundle = $bundle;
@@ -233,28 +228,29 @@ function facebook_instant_articles_field_ui_layouts_save($form, &$form_state) {
  * Get Display Suite layouts.
  */
 function facebook_instant_articles_get_layout_info() {
-  return array('facebook_instant_article' => array(
-            'label' => t('Facebook Instant Article'),
-            'path' => "",
-            'regions' => array(
-              'header' => t('Header'),
-              'body' => t('Body'),
-              'footer' => t('Footer')
-            ),
-            'image' => 1
-          )
-        );
+  return array(
+    'facebook_instant_article' => array(
+      'label' => t('Facebook Instant Article'),
+      'path' => "",
+      'regions' => array(
+        'header' => t('Header'),
+        'body' => t('Body'),
+        'footer' => t('Footer'),
+      ),
+      'image' => 1,
+    ),
+  );
 }
 
 /**
  * Utility function to sort a multidimensional array by a value in a sub-array.
  *
- * @param $a
+ * @param array $a
  *   The array to sort.
- * @param $subkey
+ * @param string $subkey
  *   The subkey to sort by.
  */
-function facebook_instant_articles_sort_fields($a, $subkey) {
+function facebook_instant_articles_sort_fields(array $a, $subkey) {
   foreach ($a as $k => $v) {
     if (isset($v[$subkey])) {
       $b[$k] = $v[$subkey];
@@ -299,18 +295,18 @@ function facebook_instant_articles_field_valid($key, $field, &$form_state, $view
 /**
  * Add the fields to the Field UI form.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The name of the entity type.
- * @param $bundle
- *   The name of the bundle
- * @param $view_mode
- *   The name of the view_mode
- * @param $form
+ * @param string $bundle
+ *   The name of the bundle.
+ * @param string $view_mode
+ *   The name of the view_mode.
+ * @param array $form
  *   A collection of form properties.
- * @param $form_state
+ * @param array $form_state
  *   A collection of form_state properties.
  */
-function facebook_instant_articles_field_ui_fields($entity_type, $bundle, $view_mode, &$form, &$form_state) {
+function facebook_instant_articles_field_ui_fields($entity_type, $bundle, $view_mode, array &$form, array &$form_state) {
 
   // Do not add the fields if there is no layout.
   if (!isset($form['#fbia_layout'])) {
@@ -319,13 +315,6 @@ function facebook_instant_articles_field_ui_fields($entity_type, $bundle, $view_
 
   // Get the fields and put them on the form.
   $fields = facebook_instant_articles_get_fields($entity_type, FALSE);
-
-  // Ultimate alter on Field UI fields, only used for edge cases.
-  $context = array(
-    'entity_type' => $entity_type,
-    'bundle' => $bundle,
-    'view_mode' => $view_mode,
-  );
 
   // Get field settings.
   $field_settings = facebook_instant_articles_get_field_settings($entity_type, $bundle, $view_mode, FALSE);
@@ -340,12 +329,6 @@ function facebook_instant_articles_field_ui_fields($entity_type, $bundle, $view_
     'hidden' => t('<Hidden>'),
   );
   drupal_alter('facebook_instant_articles_label_options', $field_label_options);
-
-  // Regions for fields.
-  $field_regions = array();
-  if (isset($form['#fbia_layout']->settings['fields'])) {
-    $field_regions = $form['#fbia_layout']->settings['fields'];
-  }
 
   foreach ($fields as $key => $field) {
 
@@ -363,8 +346,6 @@ function facebook_instant_articles_field_ui_fields($entity_type, $bundle, $view_
     if (!isset($field_settings[$key]['ft']) && isset($field_settings[$key]['ft'])) {
       $form_state['formatter_settings'][$key]['ft'] = $field_settings[$key]['ft'];
     }
-
-    $value = isset($form_state['formatter_settings']) ? $form_state['formatter_settings'] : array();
 
     $hidden = array('hidden' => t('<Hidden>'));
     $formatters = isset($field['properties']['formatters']) ? $hidden + $field['properties']['formatters'] : $hidden + array('default' => t('Default'));
@@ -414,11 +395,6 @@ function facebook_instant_articles_field_ui_fields($entity_type, $bundle, $view_
       'settings_edit' => array(),
     );
 
-    // Don't show summary or cogwheel in hidden region.
-    if (facebook_instant_articles_field_ui_check_hidden_region($key, $form_state, $field_regions)) {
-      continue;
-    }
-
     $field['name'] = $key;
     $field['entity_type'] = $entity_type;
     $field['bundle'] = $bundle;
@@ -429,43 +405,59 @@ function facebook_instant_articles_field_ui_fields($entity_type, $bundle, $view_
   $form['#submit'][] = 'facebook_instant_articles_field_ui_fields_save';
 }
 
- /**
+/**
  * Get all fields.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The name of the entity.
- * @param $cache
+ * @param bool $cache
  *   Whether we need to get the fields from cache or not.
- * @return
+ *
+ * @return array
  *   Collection of fields.
  */
 function facebook_instant_articles_get_fields($entity_type, $cache = TRUE) {
-  $fields = array('node' => array('title' => array(
-    'title' => t('Title'),
-    'field_type' => DS_FIELD_TYPE_FUNCTION,
-    'function' => 'ds_render_field',
-    'properties' => array(
-      'entity_render_key' => 'title',
-      'settings' => array(
-        'link' => array('type' => 'select', 'options' => array('no', 'yes')),
-        'wrapper' => array('type' => 'textfield', 'description' => t('Eg: h1, h2, p')),
-        'class' => array('type' => 'textfield', 'description' => t('Put a class on the wrapper. Eg: block-title')),
+  $fields = array(
+    'node' => array(
+      'title' => array(
+        'title' => t('Title'),
+        'field_type' => 2,
+        'properties' => array(
+          'entity_render_key' => 'title',
+          'settings' => array(
+            'link' => array(
+              'type' => 'select',
+              'options' => array('no', 'yes'),
+            ),
+            'wrapper' => array(
+              'type' => 'textfield',
+              'description' => t('Eg: h1, h2, p'),
+            ),
+            'class' => array(
+              'type' => 'textfield',
+              'description' => t('Put a class on the wrapper. Eg: block-title'),
+            ),
+          ),
+          'default' => array('wrapper' => 'h2', 'link' => 0, 'class' => ''),
+        ),
       ),
-      'default' => array('wrapper' => 'h2', 'link' => 0, 'class' => ''),
-    )
-  )));
+    ),
+  );
   return $fields[$entity_type];
 }
 
 /**
  * Get the field settings.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The name of the entity.
- * @param $bundle
- *   The name of bundle (ie, page or story for node types, profile for users)
- * @param $view_mode
+ * @param string $bundle
+ *   The name of bundle (ie, page or story for node types, profile for users).
+ * @param string $view_mode
  *   The name of view mode.
+ *
+ * @return array
+ *   Stored field settings.
  */
 function facebook_instant_articles_get_field_settings($entity_type, $bundle, $view_mode, $default = TRUE) {
   static $field_settings = NULL;
@@ -476,8 +468,8 @@ function facebook_instant_articles_get_field_settings($entity_type, $bundle, $vi
     }
     else {
       ctools_include('export');
-      $ds_field_settings = ctools_export_crud_load_all('facebook_instant_articles_field_settings');
-      foreach ($ds_field_settings as $layout => $layout_settings) {
+      $fbia_field_settings = ctools_export_crud_load_all('facebook_instant_articles_field_settings');
+      foreach ($fbia_field_settings as $layout_settings) {
         // Do not store configuration when the field settings is disabled.
         if (!empty($layout_settings->disabled)) {
           continue;
@@ -495,23 +487,6 @@ function facebook_instant_articles_get_field_settings($entity_type, $bundle, $vi
   }
 
   return (isset($field_settings[$entity_type][$bundle][$view_mode])) ? $field_settings[$entity_type][$bundle][$view_mode] : (isset($field_settings[$entity_type][$bundle]['default']) && $default ? $field_settings[$entity_type][$bundle]['default'] : array());
-}
-
-/**
- * Helper function to check if we are in a hidden region or not.
- */
-function facebook_instant_articles_field_ui_check_hidden_region($key, $form_state, $field_regions) {
-  $continue = FALSE;
-  if (isset($form_state['input']['fields'][$key]['region'])) {
-    if ($form_state['input']['fields'][$key]['region'] == 'hidden') {
-      $continue = TRUE;
-    }
-  }
-  elseif (!isset($field_regions[$key]) || $field_regions[$key] == 'hidden') {
-    $continue = TRUE;
-  }
-
-  return $continue;
 }
 
 /**
@@ -538,7 +513,7 @@ function facebook_instant_articles_field_ui_fields_save($form, &$form_state) {
 
   // Save settings for each field.
   $fields = $form['#fbia_fields'];
-  foreach ($fields as $key => $field) {
+  foreach ($fields as $field) {
 
     // Field settings.
     $field_values = $form_state['values']['fields'][$field];
@@ -567,7 +542,7 @@ function facebook_instant_articles_field_ui_fields_save($form, &$form_state) {
 
   // Save the record.
   if (!empty($field_settings)) {
-    $record = new stdClass;
+    $record = new stdClass();
     $record->id = $form['#export_id'];
     $record->entity_type = $entity_type;
     $record->bundle = $bundle;
@@ -576,7 +551,7 @@ function facebook_instant_articles_field_ui_fields_save($form, &$form_state) {
     drupal_write_record('facebook_instant_articles_field_settings', $record);
   }
 
-  // Clear the ds_fields cache.
+  // Clear the field cache.
   cache_clear_all('facebook_instant_articles_fields:', 'cache', TRUE);
   cache_clear_all('facebook_instant_articles_field_settings', 'cache');
 }

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains install and update functions for Bazaarvoice Products.
+ * Contains install and update functions for Facebook Instant Articles.
  */
 
 /**
@@ -98,8 +98,8 @@ function facebook_instant_articles_schema() {
       'default hook' => 'facebook_instant_articles_field_settings_info',
       'can disable' => FALSE,
       'api' => array(
-        'owner' => 'ds',
-        'api' => 'ds',
+        'owner' => 'facebook_instant_articles',
+        'api' => 'facebook_instant_articles',
         'minimum_version' => 1,
         'current_version' => 1,
       ),
@@ -144,12 +144,21 @@ function facebook_instant_articles_schema() {
     ),
     'primary key' => array('id'),
     'indexes' => array(
-      'ds_entity'       => array('entity_type'),
-      'ds_bundle'       => array('bundle'),
-      'ds_view_mode'    => array('view_mode'),
+      'fbia_entity'       => array('entity_type'),
+      'fbia_bundle'       => array('bundle'),
+      'fbia_view_mode'    => array('view_mode'),
     ),
   );
 
   return $schema;
 }
 
+/**
+ * Implements hook_uninstall().
+ */
+function facebook_instant_articles_uninstall() {
+  variable_del('facebook_instant_articles_channel_title');
+  variable_del('facebook_instant_articles_channel_description');
+  variable_del('facebook_instant_articles_channel_language');
+  variable_del('facebook_instant_articles_style');
+}
