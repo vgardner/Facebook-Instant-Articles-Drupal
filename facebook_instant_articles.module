@@ -220,7 +220,10 @@ function facebook_instant_articles_get_article_nodes() {
   $nodes = array();
   $entity_types = facebook_instant_articles_get_article_entity_types();
   foreach ($entity_types['node'] as $content_type => $entity_information) {
-    $nodes += node_load_multiple(array(), array('type' => $content_type, 'status' => 1));
+
+    $entity_ids = (array) module_invoke_all('fb_instant_articles_node_ids', $content_type);
+
+    $nodes += node_load_multiple($entity_ids, array('type' => $content_type, 'status' => 1));
   }
   return $nodes;
 }
